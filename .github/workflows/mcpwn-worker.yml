@@ -1,0 +1,136 @@
+name: Mcpwn Worker (scan one YAML target)
+run-name: ${{ inputs.workflow_name || 'Mcpwn Scan' }} - ${{ inputs.file }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Repo YAML file path"
+        required: true
+        type: string
+      image:
+        description: "Container image"
+        required: true
+        type: string
+      port:
+        description: "Container port to publish on 8080"
+        required: true
+        type: string
+      args_b64:
+        description: "Base64 JSON array of args"
+        required: true
+        type: string
+      env_b64:
+        description: "Base64 JSON object of env"
+        required: true
+        type: string
+      workflow_name:
+        description: "Custom workflow name"
+        required: false
+        type: string
+        default: "Mcpwn Scan"
+
+permissions:
+  contents: read
+  packages: read
+  # If you also want to upload SARIF into Code Scanning, uncomment:
+  # security-events: write
+
+jobs:
+  scan:
+    name: ${{ inputs.workflow_name }} - ${{ inputs.file }}
+    runs-on: depot-ubuntu-22.04
+
+    steps:
+      - name: Derive MCP_SERVER_NAME
+        env:
+          TARGET_FILE: ${{ inputs.file }}
+        run: |
+          set -euo pipefail
+          MCP_SERVER_NAME="${TARGET_FILE%.yaml}"
+          # avoid slashes in docker name
+          MCP_SERVER_NAME="${MCP_SERVER_NAME//\//-}"
+          echo "MCP_SERVER_NAME=$MCP_SERVER_NAME" >> $GITHUB_ENV
+          echo "TARGET_FILE=$TARGET_FILE" >> $GITHUB_ENV
+
+      - name: Checkout mcpwn
+        uses: actions/checkout@v5
+        with:
+          repository: drpebcak/mcpwn
+          ref: remote
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Decode args/env and build docker flags
+        env:
+          ARGS_B64: ${{ inputs.args_b64 }}
+          ENV_B64: ${{ inputs.env_b64 }}
+        run: |
+          set -euo pipefail
+
+          ARGS_JSON=$(echo "$ARGS_B64" | base64 -d)
+          ENV_JSON=$(echo "$ENV_B64"  | base64 -d)
+
+          # Build env flags from object -> -e KEY=VALUE
+          if [ "$ENV_JSON" != "null" ] && [ -n "$ENV_JSON" ]; then
+            DOCKER_ENV_ARGS=$(echo "$ENV_JSON" | jq -r 'map("-e " + .key) | join(" ")')
+            echo "DOCKER_ENV_ARGS=$DOCKER_ENV_ARGS" >> $GITHUB_ENV
+          else
+            echo "DOCKER_ENV_ARGS=" >> $GITHUB_ENV
+          fi
+
+          # Build args string from array -> "a b c"
+          if [ "$ARGS_JSON" != "null" ] && [ -n "$ARGS_JSON" ]; then
+            ARGS_STRING=$(echo "$ARGS_JSON" | jq -r 'join(" ")')
+            echo "ARGS_STRING=$ARGS_STRING" >> $GITHUB_ENV
+          else
+            echo "ARGS_STRING=" >> $GITHUB_ENV
+          fi
+
+      - name: Start mcp server
+        env: ${{ secrets }}
+        run: |
+          docker run -d --name ${MCP_SERVER_NAME} \
+            -p 8080:${{ inputs.port }} \
+            ${DOCKER_ENV_ARGS} \
+            ${{ inputs.image }} ${ARGS_STRING}
+
+      - name: Verify container is running
+        run: |
+          set -euo pipefail
+
+          # Give container a moment to start
+          sleep 2
+
+          # Check if container is still running
+          if ! docker ps --filter "name=${MCP_SERVER_NAME}" --format "{{.Names}}" | grep -q "${MCP_SERVER_NAME}"; then
+            echo "ERROR: Container ${MCP_SERVER_NAME} exited unexpectedly"
+            echo "Container logs:"
+            docker logs ${MCP_SERVER_NAME} || true
+            exit 1
+          fi
+
+          echo "Container ${MCP_SERVER_NAME} is running"
+
+      - name: Run mcpwn scan
+        run: |
+          set -euo pipefail
+          python3 mcpwn.py --output-sarif mcpwn-results.sarif --safe-mode http://localhost:8080
+
+      - name: Upload SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcpwn-results-${{ env.MCP_SERVER_NAME }}
+          path: mcpwn-results.sarif
+          retention-days: 1
