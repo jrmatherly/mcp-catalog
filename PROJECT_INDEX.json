@@ -1,0 +1,394 @@
+{
+  "metadata": {
+    "project_name": "mcp-catalog",
+    "generated": "2026-01-15T19:57:00Z",
+    "last_commit": "28ed2cc12745ed635646423459f992d6b6467e7e",
+    "commit_date": "2026-01-15T19:51:48-05:00",
+    "description": "MCP (Model Context Protocol) Catalog - Centralized registry of MCP server configurations",
+    "version": "1.0",
+    "index_size_kb": 4.5,
+    "index_tokens_estimate": 3000
+  },
+  "statistics": {
+    "mcp_catalog_entries": 78,
+    "typescript_files": 13,
+    "python_scripts": 5,
+    "cicd_workflows": 7,
+    "test_data_files": 37,
+    "documentation_files": 11,
+    "total_lines_estimate": 15000
+  },
+  "entry_points": {
+    "test_automation": {
+      "wdio_config": "mcp-server-validation-automation/wdio.conf.ts",
+      "ai_evaluation": "mcp-server-validation-automation/auto_eval.ts",
+      "run_command": "npm run wdio:all"
+    },
+    "security": {
+      "tool_linter": "scripts/mcp_tool_linter/mcp_tool_linter.py",
+      "ai_analyzer": "scripts/validation/ai-analyze-tools.py"
+    },
+    "cicd": {
+      "security_scan": ".github/workflows/mcpwn.yml",
+      "integration_test": ".github/workflows/trigger-automation.yml",
+      "upstream_sync": ".github/workflows/sync-mcp-registry.yml"
+    }
+  },
+  "directory_structure": {
+    "root": {
+      "yaml_catalog": 78,
+      "description": "MCP server catalog entries"
+    },
+    "mcp-server-validation-automation": {
+      "src": {
+        "core": [
+          "func.ts",
+          "mcpFunc.ts",
+          "selectors.ts",
+          "types.ts",
+          "timeouts.ts",
+          "softAssert.ts"
+        ],
+        "features": ["mcpServer.feature"],
+        "steps": ["common.ts", "mcpServer.step.ts"],
+        "support": ["hooks.ts"],
+        "utils": ["context.ts", "projectName.model.ts"],
+        "data": 37
+      },
+      "config": ["wdio.conf.ts", "tsconfig.json", "package.json"],
+      "entry": ["auto_eval.ts"]
+    },
+    "scripts": {
+      "mcp_tool_linter": ["mcp_tool_linter.py", "requirements.txt"],
+      "upstream_sync": ["auto_sync_workflow.py", "requirements.txt"],
+      "validation": [
+        "ai-analyze-tools.py",
+        "get-env-requirements.py",
+        "requirements.txt"
+      ]
+    },
+    ".github": {
+      "workflows": [
+        "mcpwn.yml",
+        "mcpwn-fanout.yml",
+        "mcpwn-worker.yml",
+        "trigger-automation.yml",
+        "sync-mcp-registry.yml",
+        "update-image-tag.yml",
+        "vuln-scan.yml"
+      ],
+      "scripts": ["sarif_to_md.py"]
+    },
+    "docs": ["INDEX.md", "PROJECT_OVERVIEW.md", "API_REFERENCE.md"]
+  },
+  "core_modules": {
+    "typescript": {
+      "src/core/func.ts": {
+        "exports": [
+          "waitForElement",
+          "clickElement",
+          "typeText",
+          "assertVisible",
+          "assertText"
+        ],
+        "purpose": "Common test utilities and element interaction"
+      },
+      "src/core/mcpFunc.ts": {
+        "exports": [
+          "createCatalogEntry",
+          "selectMCPServer",
+          "sendPrompt",
+          "getServerResponse"
+        ],
+        "purpose": "MCP-specific operations and OBOT API integration"
+      },
+      "src/core/selectors.ts": {
+        "exports": ["SELECTORS"],
+        "purpose": "UI element selectors for navigation, chat, MCP servers, tools"
+      },
+      "src/core/types.ts": {
+        "exports": [
+          "MCPServer",
+          "RemoteConfig",
+          "ContainerizedConfig",
+          "TestConfig"
+        ],
+        "purpose": "TypeScript interfaces and type definitions"
+      },
+      "src/core/timeouts.ts": {
+        "exports": ["TIMEOUTS"],
+        "purpose": "Wait time constants for different operation types"
+      },
+      "src/core/softAssert.ts": {
+        "exports": ["SoftAssert"],
+        "purpose": "Soft assertion framework for collecting multiple failures"
+      },
+      "auto_eval.ts": {
+        "exports": [
+          "createGradingPrompt",
+          "gradeResponse",
+          "enhanceReportWithEval"
+        ],
+        "purpose": "AI-powered test evaluation using GPT-4o-mini"
+      }
+    },
+    "python": {
+      "scripts/mcp_tool_linter/mcp_tool_linter.py": {
+        "exports": [
+          "convert_tool_to_openai_format",
+          "check_tool_with_gpt5",
+          "lint_file",
+          "analyze_tool_with_gpt"
+        ],
+        "purpose": "AI-powered security analysis using GPT-5"
+      },
+      "scripts/validation/ai-analyze-tools.py": {
+        "exports": [
+          "analyze_with_openai",
+          "extract_tools_info",
+          "load_tools_json"
+        ],
+        "purpose": "GPT-4 based version comparison and impact assessment"
+      },
+      "scripts/upstream_sync/auto_sync_workflow.py": {
+        "exports": [],
+        "purpose": "Upstream catalog synchronization automation"
+      },
+      "scripts/validation/get-env-requirements.py": {
+        "exports": [],
+        "purpose": "Environment variable extraction from configs"
+      },
+      ".github/scripts/sarif_to_md.py": {
+        "exports": [],
+        "purpose": "SARIF security report to Markdown converter"
+      }
+    }
+  },
+  "dependencies": {
+    "node": {
+      "runtime": "Node.js 22",
+      "package_manager": "npm",
+      "key_packages": {
+        "webdriverio": "^9.20.0",
+        "@wdio/cucumber-framework": "^9.20.0",
+        "openai": "^6.7.0",
+        "axios": "^1.13.0",
+        "chai": "^6.2.0",
+        "typescript": "^5.9.3",
+        "allure-commandline": "^2.34.1"
+      }
+    },
+    "python": {
+      "runtime": "Python 3.13+",
+      "key_packages": {
+        "openai": ">=1.0.0",
+        "pyyaml": ">=6.0",
+        "requests": "latest"
+      }
+    },
+    "infrastructure": {
+      "docker": "Container runtime",
+      "github_actions": "CI/CD platform",
+      "obot": "ghcr.io/obot-platform/obot:latest"
+    }
+  },
+  "mcp_catalog_categories": {
+    "developer_tools": [
+      "github",
+      "gitlab",
+      "postman",
+      "playwright",
+      "gitmcp",
+      "atlassian",
+      "linear",
+      "asana",
+      "todoist",
+      "mondaycom",
+      "browserbase",
+      "filescom"
+    ],
+    "databases": [
+      "postgresql",
+      "mongodb_database",
+      "mongodb_atlas_management",
+      "mysql",
+      "redis",
+      "supabase",
+      "snowflake",
+      "bigquery",
+      "elasticsearch",
+      "neon",
+      "chroma"
+    ],
+    "cloud_platforms": [
+      "aws",
+      "aws_eks",
+      "aws_cdk",
+      "aws_knowledge",
+      "aws_documentation",
+      "aws_redshift",
+      "aws_kendra",
+      "azure",
+      "digitalocean",
+      "cloudflare",
+      "render",
+      "cloud_run",
+      "terraform"
+    ],
+    "ai_search": [
+      "brave_search",
+      "tavily_search",
+      "duckduckgo_search",
+      "exa_search",
+      "context7",
+      "deepwiki",
+      "ref"
+    ],
+    "analytics_monitoring": [
+      "datadog",
+      "grafana",
+      "dynatrace",
+      "pagerduty",
+      "morningstar",
+      "tableau"
+    ],
+    "productivity": [
+      "slack",
+      "notion",
+      "gmail",
+      "outlook",
+      "calendar",
+      "google-calendar",
+      "google-drive",
+      "google-sheets",
+      "onedrive",
+      "excel",
+      "word",
+      "contact"
+    ],
+    "business_finance": [
+      "salesforce",
+      "hubspot",
+      "stripe",
+      "square",
+      "paypal",
+      "wix",
+      "wordpress",
+      "zapier"
+    ],
+    "data_documents": [
+      "databricks_genie",
+      "databricks_uc_functions",
+      "databricks_vector_search",
+      "markitdown",
+      "firecrawl",
+      "antv_charts",
+      "microsoft-docs",
+      "google-maps-grounding-lite"
+    ]
+  },
+  "configuration_files": {
+    "typescript": {
+      "tsconfig.json": "TypeScript compiler configuration (ESNext, CommonJS)",
+      "wdio.conf.ts": "WebdriverIO test framework configuration",
+      "package.json": "Node.js dependencies and scripts"
+    },
+    "python": {
+      "requirements.txt": "Python dependencies (multiple locations)"
+    },
+    "cicd": {
+      "mcpwn.yml": "Security scanning with mcpwn tool",
+      "trigger-automation.yml": "Integration testing with OBOT",
+      "sync-mcp-registry.yml": "Upstream synchronization",
+      "vuln-scan.yml": "Vulnerability scanning",
+      "update-image-tag.yml": "Docker image updates"
+    },
+    "project": {
+      "renovate.json": "Automated dependency updates",
+      ".gitignore": "Git ignore patterns"
+    }
+  },
+  "documentation": {
+    "primary": {
+      "docs/INDEX.md": "Documentation navigation hub and quick reference",
+      "docs/PROJECT_OVERVIEW.md": "Architecture, design, and technology stack",
+      "docs/API_REFERENCE.md": "Complete TypeScript and Python API documentation"
+    },
+    "serena_memories": {
+      "project_overview.md": "Quick reference summary",
+      "suggested_commands.md": "Development command reference",
+      "code_style_and_conventions.md": "Coding standards",
+      "task_completion_checklist.md": "Quality assurance checklist",
+      "cicd_workflows.md": "CI/CD pipeline guide",
+      "mcp_catalog_schema.md": "YAML schema specification",
+      "documentation_index.md": "Documentation organization"
+    },
+    "readme": {
+      "mcp-server-validation-automation/README.md": "Test automation suite guide"
+    }
+  },
+  "test_coverage": {
+    "integration_tests": {
+      "framework": "WebdriverIO + Cucumber",
+      "features": ["mcpServer.feature"],
+      "test_data_files": 37,
+      "ai_evaluation": "GPT-4o-mini"
+    },
+    "security_tests": {
+      "tool": "mcpwn",
+      "coverage": "containerized MCP servers"
+    }
+  },
+  "architecture_patterns": {
+    "test": "Page Object Model (POM) with Cucumber BDD",
+    "cicd": "Matrix strategy with parallel execution",
+    "code_organization": "Separation of concerns (Core/Steps/Support/Utils)",
+    "data_management": "External JSON test data files"
+  },
+  "quick_start": {
+    "install": {
+      "automation": "cd mcp-server-validation-automation && npm ci",
+      "python": "cd scripts/mcp_tool_linter && pip install -r requirements.txt"
+    },
+    "test": {
+      "all_tests": "npm run wdio:all",
+      "specific_server": "npx wdio run wdio.conf.ts --cucumberOpts.tagExpression='@gitlab'",
+      "ai_eval": "npm run eval"
+    },
+    "security": {
+      "lint_file": "python mcp_tool_linter.py <file>.yaml",
+      "lint_all": "python mcp_tool_linter.py ../.. --json report.json"
+    }
+  },
+  "key_file_locations": {
+    "frequently_modified": [
+      "*.yaml (catalog entries)",
+      "mcp-server-validation-automation/src/data/*.MCP.json",
+      ".github/workflows/*.yml"
+    ],
+    "configuration": [
+      "mcp-server-validation-automation/tsconfig.json",
+      "mcp-server-validation-automation/wdio.conf.ts",
+      "scripts/*/requirements.txt"
+    ],
+    "documentation": [
+      "docs/*.md",
+      ".serena/memories/*.md",
+      "mcp-server-validation-automation/README.md"
+    ]
+  },
+  "token_efficiency": {
+    "index_size_tokens": 3000,
+    "full_codebase_tokens": 58000,
+    "savings_per_session": 55000,
+    "reduction_percentage": 94,
+    "breakeven_sessions": 1,
+    "100_sessions_savings": 5500000
+  },
+  "related_resources": {
+    "mcp_spec": "https://modelcontextprotocol.io/",
+    "obot_platform": "https://github.com/obot-platform/obot",
+    "webdriverio_docs": "https://webdriver.io/",
+    "documentation_hub": "docs/INDEX.md"
+  }
+}
