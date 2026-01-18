@@ -126,7 +126,11 @@ jobs:
           fi
 
       - name: Start mcp server
-        env: ${{ secrets }}
+        env:
+          # Common API keys that MCP servers may require
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker run -d --name ${MCP_SERVER_NAME} \
             -p 8080:${{ matrix.server.containerizedConfig.port }} \
