@@ -49,6 +49,7 @@ jobs:
 
   vuln-scan:
     needs: generate-matrix
+    if: ${{ needs.generate-matrix.outputs.matrix != '[]' && needs.generate-matrix.outputs.matrix != '' }}
     strategy:
       fail-fast: false
       matrix:

@@ -68,6 +68,7 @@ jobs:
 
   run-validation:
     needs: generate-matrix
+    if: ${{ needs.generate-matrix.outputs.matrix != '[]' && needs.generate-matrix.outputs.matrix != '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
