@@ -1,3 +1,5 @@
 .github/*
 scripts/*
 mcp-server-validation-automation/*
+renovate.json
+PROJECT_INDEX.json
