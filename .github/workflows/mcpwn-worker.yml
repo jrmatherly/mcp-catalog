@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload SARIF artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: mcpwn-results-${{ env.MCP_SERVER_NAME }}
           path: mcpwn-results.sarif
