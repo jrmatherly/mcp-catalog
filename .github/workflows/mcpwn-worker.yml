@@ -54,7 +54,7 @@ jobs:
           echo "TARGET_FILE=$TARGET_FILE" >> $GITHUB_ENV
 
       - name: Checkout mcpwn
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: drpebcak/mcpwn
           ref: remote
