@@ -42,7 +42,7 @@
     "fix-esm": "^1.0.1",
     "glob": "^11.0.3",
     "google-auth-library": "^10.4.2",
-    "googleapis": "^164.1.0",
+    "googleapis": "^170.0.0",
     "imap-simple": "^5.1.0",
     "mailparser": "^3.7.5",
     "node-fetch": "^3.3.2",
